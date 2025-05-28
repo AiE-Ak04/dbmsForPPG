@@ -259,24 +259,12 @@ CREATE TABLE Employee (
 );
 -- 2 end
 
-
 -- 3 start
-INSERT INTO Employee (EMPNO, ENAME, JOB, MANAGER_NO, SAL, COMMISSION)
-VALUES (1, 'John Doe', 'Manager', NULL, 5000, 1000);
-
-INSERT INTO Employee (EMPNO, ENAME, JOB, MANAGER_NO, SAL, COMMISSION)
-VALUES (2, 'Jane Smith', 'Developer', 1, 4000, NULL);
-
-INSERT INTO Employee (EMPNO, ENAME, JOB, MANAGER_NO, SAL, COMMISSION)
-VALUES (3, 'Michael Brown', 'Analyst', 1, 4500, 500);
+START transaction;
 -- 3 end
 
+
 -- 4 start
-START transaction;
--- 4 end
-
-
--- 5 start
 INSERT INTO Employee (EMPNO, ENAME, JOB, MANAGER_NO, SAL, COMMISSION)
 VALUES (10, 'John Doe', 'Manager', NULL, 5000, 1000);
 
@@ -285,36 +273,36 @@ VALUES (20, 'Jane Smith', 'Developer', 1, 4000, NULL);
 
 INSERT INTO Employee (EMPNO, ENAME, JOB, MANAGER_NO, SAL, COMMISSION)
 VALUES (30, 'Michael Brown', 'Analyst', 1, 4500, 500);
+-- 4 end
+
+-- 5 start
+rollback;
 -- 5 end
 
--- 6 start
-rollback;
+-- 6 start // output part
+SELECT * FROM Employee;
 -- 6 end
 
--- 7 start // output part
-SELECT * FROM Employee;
+-- 7 start
+ALTER TABLE Employee
+ADD CONSTRAINT pk_employee PRIMARY KEY (EMPNO);
 -- 7 end
 
 -- 8 start
 ALTER TABLE Employee
-ADD CONSTRAINT pk_employee PRIMARY KEY (EMPNO);
--- 8 end
-
--- 9 start
-ALTER TABLE Employee
 MODIFY ENAME VARCHAR(50) NOT NULL,
 MODIFY JOB VARCHAR(50) NOT NULL,
 MODIFY SAL INT NOT NULL;
--- 9 end
+-- 8 end
 
--- 10 start // don't worry this insertion will fail n will give err! ... go for 11 
+-- 9 start // don't worry this insertion will fail n will give err! ... go for 11 
 INSERT INTO Employee (EMPNO, ENAME, JOB, MANAGER_NO, SAL, COMMISSION)
 VALUES (4, NULL, 'Tester', 2, 3000, 200);
--- 10 end
+-- 9 end
 
--- 11 start
+-- 10 start
 SELECT * FROM Employee;
--- 11 end
+-- 10 end
 `,
     2: `-- 1 start
 CREATE DATABASE IF NOT EXISTS temp2;
