@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DBMS jugaad @ PPG!</title>
+
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet" />
+
+
+
+<style>
+  
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    overflow-x: hidden;
+    font-family: 'Poppins', sans-serif;
+    background: #0a0a14;
+    color: #ffe6f0;
+  }
+
+
+  canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: 0; 
+    pointer-events: none;
+  }
+
+
+  #app {
+    position: relative;
+    z-index: 10; 
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    text-align: center;
+    font-weight: 600;
+    font-size: 2.8rem;
+    margin-bottom: 2rem;
+    color: #ff79c6;
+    text-shadow: 0 0 8px #ff79c6, 0 0 15px #ff79c6;
+  }
+
+  .programs {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  
+  .level {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+  }
+  
+  .level-1 { margin-bottom: 1.5rem; }
+  .level-2 { margin-bottom: 1.5rem; }
+  
+
+  .program {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 15px rgba(255, 105, 180, 0.15);
+    backdrop-filter: blur(15px);
+    padding: 2rem;
+    cursor: pointer;
+    text-align: center;
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: #ffbad2;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    user-select: none;
+  }
+  .program:hover {
+    box-shadow: 0 0 25px #ff79c6, 0 0 40px #ff79c6;
+    transform: scale(1.05);
+    color: #fff;
+  }
+
+
+  #overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(10,10,20,0.7);
+    backdrop-filter: blur(3px);
+    z-index: 90;
+    display: none;
+  }
+  #overlay.active {
+    display: block;
+  }
+
+  #expanded {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    max-width: 900px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    backdrop-filter: blur(30px);
+    box-shadow: 0 0 30px #ff79c6;
+    padding: 2rem 2.5rem 2.5rem 2.5rem;
+    display: none;
+    flex-direction: column;
+    z-index: 100;
+    user-select: text;
+  }
+  #expanded.active {
+    display: flex;
+    animation: fadeInScale 0.4s ease forwards;
+  }
+
+  @keyframes fadeInScale {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  }
+
+  #closeBtn {
+    align-self: flex-end;
+    background: transparent;
+    border: none;
+    font-size: 1.7rem;
+    color: #ff79c6;
+    cursor: pointer;
+    font-weight: 600;
+    transition: color 0.3s ease;
+  }
+  #closeBtn:hover {
+    color: #ffb6d1;
+  }
+
+  #copyBtn {
+    align-self: flex-end;
+    background: #ff79c6;
+    border: none;
+    padding: 0.5rem 1.3rem;
+    font-weight: 600;
+    color: #1b1b2f;
+    border-radius: 15px;
+    cursor: pointer;
+    box-shadow: 0 0 10px #ff79c6;
+    margin-bottom: 1rem;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.25s ease;
+  }
+  #copyBtn:hover {
+    background-color: #ffa0ce;
+    box-shadow: 0 0 15px #ffa0ce;
+    transform: scale(1.1);
+  }
+
+  pre {
+    background: rgba(40, 30, 50, 0.9);
+    border-radius: 20px;
+    padding: 2rem;
+    overflow-y: auto;
+    max-height: 500px;
+    font-family: 'Fira Mono', monospace;
+    font-size: 1.4rem;
+    line-height: 1.6;
+    color: #ffd6e8;
+    white-space: pre-wrap;
+    box-shadow: 0 0 30px #ff79c6;
+  }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 2rem; }
+    .program { font-size: 1.1rem; padding: 1.5rem; }
+    #expanded { width: 95vw; padding: 1.5rem 1.8rem 1.8rem 1.8rem; }
+    pre { font-size: 1.1rem; max-height: 350px; padding: 1rem; }
+  }
+
+
+.token.comment { color: #999; font-style: italic; }
+.token.keyword { color: #ff007c; font-weight: bold; }
+.token.string { color: #00ffa2; }
+.token.function { color: #ffc600; }
+.token.number { color: #19f9d8; }
+pre, code {
+  background: #1e1e3f;
+  color: #f8f8f2;
+  border-radius: 12px;
+}
+
+</style>
+</head>
+<body>
+
+
+<canvas id="backgroundCanvas"></canvas>
+
+
+<main id="app">
+    <header>
+      <h1> 💫 apki  seva  m ✨ </h1>
+    </header>
+  
+    <section class="programs">
+      <div class="level level-1">
+        <div class="program" data-id="1">Program 1</div>
+      </div>
+      <div class="level level-2">
+        <div class="program" data-id="2">Program 2</div>
+        <div class="program" data-id="3">Program 3</div>
+      </div>
+      <div class="level level-3">
+        <div class="program" data-id="4">Program 4</div>
+        <div class="program" data-id="5">Program 5</div>
+        <div class="program" data-id="6">Program 6</div>
+      </div>
+    </section>
+  </main>
+  
+
+
+<div id="overlay"></div>
+
+<div id="expanded" role="dialog" aria-modal="true" aria-labelledby="codeTitle" tabindex="-1">
+  <button id="closeBtn" aria-label="Close">&times;</button>
+  <button id="copyBtn">Copy Code</button>
+  <pre><code id="codeBlock" class="language-javascript" tabindex="0"></code></pre>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+
+<script>
+
+  const codes = {
+    1: `-- 1 start
+CREATE DATABASE IF NOT EXISTS temp1;
+use temp1;
+-- 1 end
+
+-- 2 start
+CREATE TABLE Employee (
+    EMPNO int,
+    ENAME VARCHAR(50),
+    JOB VARCHAR(50),
+    MANAGER_NO int,
+    SAL int,
+    COMMISSION int
+);
+-- 2 end
+
+
+-- 3 start
+INSERT INTO Employee (EMPNO, ENAME, JOB, MANAGER_NO, SAL, COMMISSION)
+VALUES (1, 'John Doe', 'Manager', NULL, 5000, 1000);
+
+INSERT INTO Employee (EMPNO, ENAME, JOB, MANAGER_NO, SAL, COMMISSION)
+VALUES (2, 'Jane Smith', 'Developer', 1, 4000, NULL);
+
+INSERT INTO Employee (EMPNO, ENAME, JOB, MANAGER_NO, SAL, COMMISSION)
+VALUES (3, 'Michael Brown', 'Analyst', 1, 4500, 500);
+-- 3 end
+
+-- 4 start
+START transaction;
+-- 4 end
+
+
+-- 5 start
+INSERT INTO Employee (EMPNO, ENAME, JOB, MANAGER_NO, SAL, COMMISSION)
+VALUES (10, 'John Doe', 'Manager', NULL, 5000, 1000);
+
+INSERT INTO Employee (EMPNO, ENAME, JOB, MANAGER_NO, SAL, COMMISSION)
+VALUES (20, 'Jane Smith', 'Developer', 1, 4000, NULL);
+
+INSERT INTO Employee (EMPNO, ENAME, JOB, MANAGER_NO, SAL, COMMISSION)
+VALUES (30, 'Michael Brown', 'Analyst', 1, 4500, 500);
+-- 5 end
+
+-- 6 start
+rollback;
+-- 6 end
+
+-- 7 start // output part
+SELECT * FROM Employee;
+-- 7 end
+
+-- 8 start
+ALTER TABLE Employee
+ADD CONSTRAINT pk_employee PRIMARY KEY (EMPNO);
+-- 8 end
+
+-- 9 start
+ALTER TABLE Employee
+MODIFY ENAME VARCHAR(50) NOT NULL,
+MODIFY JOB VARCHAR(50) NOT NULL,
+MODIFY SAL INT NOT NULL;
+-- 9 end
+
+-- 10 start // don't worry this insertion will fail n will give err! ... go for 11 
+INSERT INTO Employee (EMPNO, ENAME, JOB, MANAGER_NO, SAL, COMMISSION)
+VALUES (4, NULL, 'Tester', 2, 3000, 200);
+-- 10 end
+
+-- 11 start
+SELECT * FROM Employee;
+-- 11 end
+`,
+    2: `-- 1 start
+CREATE DATABASE IF NOT EXISTS temp2;
+USE temp2;
+-- 1 end
+
+-- 2 start
+CREATE TABLE Employee (
+    EMPNO INT PRIMARY KEY,
+    ENAME VARCHAR(50),
+    JOB VARCHAR(50),
+    MGR INT,
+    SAL DECIMAL(10, 2)
+);
+-- 2 end
+
+-- 3 start
+ALTER TABLE Employee
+ADD COMMISSION DECIMAL(10, 2);
+-- 3 end
+
+-- 4 start
+DESC Employee;
+-- 4 end
+
+-- 5 start
+INSERT INTO Employee VALUES (101, 'Braham Kumar', 'Manager', NULL, 80000.00, 5000.00);
+INSERT INTO Employee VALUES (102, 'Shubham Kumar', 'Analyst', 101, 60000.00, 3000.00);
+INSERT INTO Employee VALUES (103, 'Aman Kumar', 'Clerk', 102, 40000.00, 1000.00);
+INSERT INTO Employee VALUES (104, 'Rajan Gupta', 'Salesman', 101, 70000.00, 4000.00);
+INSERT INTO Employee VALUES (105, 'Shiv Yadav', 'Clerk', 102, 38000.00, 800.00);
+-- 5 end
+
+-- 6 start
+SELECT * FROM Employee;
+-- 6 end
+
+-- 7 start
+UPDATE Employee
+SET JOB = 'Senior Manager'
+WHERE EMPNO = 101;
+
+UPDATE Employee
+SET JOB = 'Senior Analyst'
+WHERE EMPNO = 102;
+
+UPDATE Employee
+SET JOB = 'Office Clerk'
+WHERE EMPNO = 103 OR EMPNO = 105;
+
+UPDATE Employee
+SET JOB = 'Sales Executive'
+WHERE EMPNO = 104;
+-- 7 end
+
+-- 8 start
+SELECT * FROM Employee;
+-- 8 end
+
+-- 9 start
+ALTER TABLE Employee
+RENAME COLUMN ENAME TO EMP_NAME;
+-- 9 end
+
+-- 10 start
+DESC Employee;
+-- 10 end
+
+
+-- 11 start
+DELETE FROM Employee
+WHERE EMPNO = 105;
+-- 11 end
+
+-- 12 start
+SELECT * FROM Employee;
+-- 12 end`,
+    3: `-- 1 start
+CREATE DATABASE IF NOT EXISTS temp3;
+USE temp3;
+-- 1 end
+
+-- 2 start
+CREATE TABLE _Employee_ (
+    E_id INT PRIMARY KEY,
+    E_name VARCHAR(100),
+    Age INT,
+    Salary DECIMAL(10, 2)
+);
+-- 2 end
+
+-- 3 start
+INSERT INTO Employee VALUES (1, 'Braham Kumar', 30, 50000);
+INSERT INTO Employee VALUES (2, 'Shubham Kumar', 25, 60000);
+INSERT INTO Employee VALUES (3, 'Anjali Kumari', 35, 55000);
+INSERT INTO Employee VALUES (4, 'Aman Kumar', 28, 62000);
+INSERT INTO Employee VALUES (5, 'Shoaib Akhtar', 40, 70000);
+-- 3 end
+
+
+-- 4 start
+SELECT COUNT(E_NAME) AS "NUMBER OF EMPLOYEES" 
+	FROM EMPLOYEE;
+-- 4 end
+
+-- 5 start
+SELECT MAX(AGE) AS "MAXIMUM AGE" 
+FROM EMPLOYEE;
+-- 5 end
+
+-- 6 start
+SELECT MIN(AGE) AS "MINIMUM AGE"
+FROM EMPLOYEE;
+-- 6 end
+
+-- 7 start
+SELECT E_NAME, SALARY 
+FROM EMPLOYEE 
+ORDER BY SALARY ASC;
+-- 7 end
+
+-- 8 start
+SELECT Age, SUM(SALARY) AS "TOTAL SALARY"
+FROM EMPLOYEE
+GROUP BY AGE;
+-- 8 end
+
+`,
+    4: `-- 1 start
+CREATE DATABASE IF NOT EXISTS temp4;
+USE temp4;
+-- 1 
+
+-- 2 start
+CREATE TABLE CUSTOMERS (
+    ID INT PRIMARY KEY,
+    NAME VARCHAR(100),
+    AGE INT,
+    ADDRESS VARCHAR(200),
+    SALARY DECIMAL(10, 2)
+);
+-- 2 end
+
+-- 3 start
+CREATE TABLE CUSTOMERS_LOG (
+    LOG_ID INT AUTO_INCREMENT PRIMARY KEY,
+    ACTION_TYPE VARCHAR(10),
+    CUSTOMER_ID INT,
+    NAME VARCHAR(100),
+    AGE INT,
+    ADDRESS VARCHAR(200),
+    SALARY DECIMAL(10, 2),
+    ACTION_TIMESTAMP DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+-- 3 end
+
+-- 4 start
+DELIMITER //
+
+CREATE TRIGGER trg_customers_insert
+AFTER INSERT ON CUSTOMERS
+FOR EACH ROW
+BEGIN
+    INSERT INTO CUSTOMERS_LOG (ACTION_TYPE, CUSTOMER_ID, NAME, AGE, ADDRESS, SALARY)
+    VALUES ('INSERT', NEW.ID, NEW.NAME, NEW.AGE, NEW.ADDRESS, NEW.SALARY);
+END;
+//
+
+DELIMITER ;
+-- 4 end
+
+-- 5 start
+DELIMITER //
+
+CREATE TRIGGER trg_customers_update
+AFTER UPDATE ON CUSTOMERS
+FOR EACH ROW
+BEGIN
+    INSERT INTO CUSTOMERS_LOG (ACTION_TYPE, CUSTOMER_ID, NAME, AGE, ADDRESS, SALARY)
+    VALUES ('UPDATE', NEW.ID, NEW.NAME, NEW.AGE, NEW.ADDRESS, NEW.SALARY);
+END;
+//
+
+DELIMITER ;
+-- 5 end
+
+-- 6 start
+DELIMITER //
+
+CREATE TRIGGER trg_customers_delete
+AFTER DELETE ON CUSTOMERS
+FOR EACH ROW
+BEGIN
+    INSERT INTO CUSTOMERS_LOG (ACTION_TYPE, CUSTOMER_ID, NAME, AGE, ADDRESS, SALARY)
+    VALUES ('DELETE', OLD.ID, OLD.NAME, OLD.AGE, OLD.ADDRESS, OLD.SALARY);
+END;
+//
+
+DELIMITER ;
+-- 6 end
+
+-- 7 start
+INSERT INTO CUSTOMERS 
+VALUES (10, 'Braham Kumar', 30, 'Bangalore', 8000);
+-- 7 end
+
+-- 8 start
+SELECT * FROM CUSTOMERS_LOG;
+-- 8 end
+
+-- 9 start 
+UPDATE CUSTOMERS
+	SET SALARY = 6000
+		WHERE ID = 10;
+-- 9 end
+
+-- 10 start
+SELECT * FROM CUSTOMERS_LOG;
+-- 10 end
+
+-- 11 start
+DELETE FROM CUSTOMERS
+WHERE ID = 10;
+-- 11 end
+
+-- 12 start
+SELECT * FROM CUSTOMERS_LOG;
+-- 12 end
+
+
+
+`,
+    5: `-- 1 start
+CREATE DATABASE IF NOT EXISTS temp5;
+USE temp5;
+-- 1 end
+
+-- 2 start
+CREATE TABLE Employee (
+    E_id int PRIMARY KEY,
+    E_name VARCHAR(100), 
+    Age int,
+    Salary int
+);
+-- 2 end
+
+-- 3 start
+INSERT INTO EMPLOYEE VALUES (1, 'Braham Kumar', 30, 50000);
+INSERT INTO EMPLOYEE VALUES (2, 'Shubham', 32, 55000);
+INSERT INTO EMPLOYEE VALUES (3, 'Bikash', 28, 48000);
+-- 3 end
+
+
+-- 4 start
+DELIMITER //
+
+
+CREATE PROCEDURE ReadEmployees()
+BEGIN
+    DECLARE v_E_id INT;
+    DECLARE v_E_name VARCHAR(100);
+    DECLARE v_Age INT;
+    DECLARE v_Salary INT;
+    
+    DECLARE done INT DEFAULT 0;
+    
+    DECLARE emp_cursor CURSOR FOR
+        SELECT E_id, E_name, Age, Salary FROM Employee;
+
+    
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+    
+    OPEN emp_cursor;
+
+    
+    read_loop: LOOP
+        FETCH emp_cursor INTO v_E_id, v_E_name, v_Age, v_Salary;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        
+        SELECT 
+            v_E_id AS E_id, 
+            v_E_name AS E_name, 
+            v_Age AS Age, 
+            v_Salary AS Salary;
+    END LOOP;
+
+    
+    CLOSE emp_cursor;
+END;
+//
+
+
+DELIMITER ;
+-- 4 end
+
+-- 5 start
+CALL ReadEmployees();
+-- 5 end`,
+    6: `-- 1 start
+CREATE DATABASE IF NOT EXISTS temp6;
+USE temp6;
+-- 1 end
+
+-- 2 start
+CREATE TABLE N_RollCall (
+    id INT,
+    name VARCHAR(100),
+    roll_date DATE
+);
+-- 2 end
+
+-- 3 start
+INSERT INTO N_RollCall VALUES 
+(1, 'Braham Kumar', '2015-01-22'),
+(2, 'Shubham Kumar', '2016-04-22'),
+(3, 'Bikash Singh', '2017-05-22');
+-- 3 end
+
+-- 4 start
+CREATE TABLE O_RollCall (
+    id INT,
+    name VARCHAR(100),
+    roll_date DATE
+);
+-- 4 end
+
+
+-- 5 start
+INSERT INTO O_RollCall VALUES 
+(4, 'Amit Singh', '2015-01-22'),
+(5, 'Mukesh Kumar', '2016-04-22'),
+(6, 'Abhay Singh', '2017-05-22');
+-- 5 end
+
+-- 6 start
+DELIMITER $$
+
+CREATE PROCEDURE Merge_RollCall_Data()
+BEGIN
+    INSERT INTO O_RollCall (id, name, roll_date)
+    SELECT n.id, n.name, n.roll_date
+    FROM N_RollCall n
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM O_RollCall o
+        WHERE o.id = n.id
+          AND o.name = n.name
+          AND o.roll_date = n.roll_date
+    );
+    
+    SELECT 'Data merged successfully from N_RollCall to O_RollCall.' AS message;
+END$$
+
+DELIMITER ;
+-- 6 end
+
+-- 7 start
+CALL Merge_RollCall_Data();
+-- 7 end
+
+-- 8 start
+SELECT * FROM N_Rollcall;
+-- 8 end
+
+-- 9 start
+SELECT * FROM O_Rollcall;
+-- 9 end`
+  };
+
+  const programs = document.querySelectorAll('.program');
+  const expanded = document.getElementById('expanded');
+  const overlay = document.getElementById('overlay');
+  const codeBlock = document.getElementById('codeBlock');
+  const copyBtn = document.getElementById('copyBtn');
+  const closeBtn = document.getElementById('closeBtn');
+
+
+  programs.forEach(program => {
+    program.addEventListener('click', () => {
+      const id = program.dataset.id;
+      codeBlock.textContent = codes[id] || '// Code not found';
+      Prism.highlightElement(codeBlock); 
+      expanded.classList.add('active');
+      overlay.classList.add('active');
+      expanded.focus();
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  const closeModal = () => {
+    expanded.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  };
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', closeModal);
+  window.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && expanded.classList.contains('active')) closeModal();
+  });
+
+
+  copyBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(codeBlock.textContent);
+      copyBtn.textContent = 'Copied!';
+      copyBtn.style.backgroundColor = '#ffb6d1';
+      setTimeout(() => {
+        copyBtn.textContent = 'Copy Code';
+        copyBtn.style.backgroundColor = '#ff79c6';
+      }, 1500);
+    } catch {
+      alert('Failed to copy');
+    }
+  });
+
+
+  const canvas = document.getElementById('backgroundCanvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x0a0a14, 0);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+  camera.position.z = 20;
+
+  const particlesCount = 1000;
+  const geometry = new THREE.BufferGeometry();
+  const positions = new Float32Array(particlesCount * 3);
+  for(let i=0; i<particlesCount; i++) {
+    positions[i*3] = (Math.random()-0.5)*40;
+    positions[i*3+1] = (Math.random()-0.5)*40;
+    positions[i*3+2] = (Math.random()-0.5)*40;
+  }
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+  const material = new THREE.PointsMaterial({
+    size: 0.15,
+    color: 0xff79c6,
+    transparent: true,
+    opacity: 0.7,
+    blending: THREE.AdditiveBlending
+  });
+
+  const particles = new THREE.Points(geometry, material);
+  scene.add(particles);
+
+  let mouseX = 0, mouseY = 0;
+  document.addEventListener('mousemove', e => {
+    mouseX = (e.clientX/window.innerWidth)*2 - 1;
+    mouseY = -(e.clientY/window.innerHeight)*2 + 1;
+  });
+
+  function animate() {
+    requestAnimationFrame(animate);
+    particles.rotation.y += 0.0015;
+    particles.rotation.x += 0.0007;
+    particles.position.x += (mouseX * 3 - particles.position.x) * 0.05;
+    particles.position.y += (mouseY * 3 - particles.position.y) * 0.05;
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+  });
+
+
+document.addEventListener("contextmenu", e => e.preventDefault());
+
+
+document.onkeydown = function (e) {
+  if (
+    e.key === "F12" ||
+    (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key)) ||
+    (e.ctrlKey && e.key === "U")
+  ) {
+    return false;
+  }
+};
+
+	
+(function detectDevTools() {
+  const threshold = 160;
+  setInterval(function () {
+    const start = performance.now();
+    debugger;
+    const end = performance.now();
+    if (end - start > threshold) {
+      document.body.innerHTML = "<h1 style='color:#ff79c6;text-align:center;padding:3rem;'>DevTools is not allowed on this site.</h1>";
+    }
+  }, 1000);
+})();
+
+
+</script>
+</body>
+</html>
